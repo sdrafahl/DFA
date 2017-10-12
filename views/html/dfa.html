@@ -6,27 +6,39 @@
   </style>
 </head>
 <body>
-  <canvas id="canvas" width="1000" height="1000"
-    style="border:1px solid #c3c3c3;">
-    Your browser does not support the canvas element.
-  </canvas>
+  <div id="dfa_status">
+    DFA Not Selected
+  </div>
   <div>
-    <form>
-      <table style="width:100%">
-        <tr>
+    <form action="javascript:validate()">
+      <table style="width:100%" id="table">
+        <tr id="transitions">
           <th>1</th>
           <th>2</th>
         </tr>
         <tr>
-          <th> A <input type="text" name="1A"> </th>
-          <th> <input type="text" name="1B"> </th>
+          <th> A <input type="text" id="1A"> </th>
+          <th> <input type="text" id="1B"> </th>
         </tr>
         <tr>
-          <th> B <input type="text" name="2A"> </th>
-          <th> <input type="text" name="2B"> </th>
+          <th> B <input type="text" id="2A"> </th>
+          <th> <input type="text" id="2B"> </th>
         </tr>
       </table>
+      <button id="states">Plus States</button>
+      <button id="trans">Plus Transitions</button>
       <br>
+      Terminal State <input type="text" id="terminal">
+      <br>
+      Start State <input type="text" id="start">
+      <br> <br>
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+  <div>
+    <form id = "form">
+      String
+      <input type="text" name="string">
       <input type="submit" value="Submit">
     </form>
   </div>
