@@ -65,12 +65,18 @@ function addTransition() {
   tr = document.getElementById("transitions");
   tr.appendChild(th);
   columns = document.getElementById("table1").childNodes[1].childNodes;
-  console.log(document.getElementById("table1").childNodes[1].childNodes);
   for(var x=2;x<document.getElementById("table1").childNodes[1].childNodes.length;x++) {
-    if(x % 2 == 0) {
+    if(x % 2 == 0 || x > 6) {
       newth = document.createElement("th");
       newInput = document.createElement("input");
-      newInput.id = localStorage.getItem("width") + alphabet[(x/2)-1];
+      var a = "";
+      console.log(x);
+      if(x > 6) {
+        a = alphabet[(x-1)/2];
+      } else {
+        a = alphabet[(x/2)-1];
+      }
+      newInput.id = localStorage.getItem("width") * 1 + 1 + a;
       newth.appendChild(newInput);
       document.getElementById("table1").childNodes[1].childNodes[x].appendChild(newth);
     }
