@@ -41,12 +41,13 @@ function validate() {
 
 function addState() {
   tr = document.createElement("tr");
-  table = document.getElementById("table1");
+  table = document.getElementById("table1").childNodes[1];
+  lab = document.createElement("th");
+  index = localStorage.getItem("height") * 1;
+  lab.innerHTML = alphabet[index];
+  tr.appendChild(lab);
   for(var x=0;x<localStorage.getItem("width");x++) {
     th = document.createElement("th");
-    if(x == 0) {
-      th.innerHTML = alphabet[localStorage.getItem("height")];
-    }
     input = document.createElement("input");
     input.id = "" + (x + 1) + alphabet[localStorage.getItem("height")];
     th.appendChild(input);
@@ -60,18 +61,21 @@ function addState() {
 
 function addTransition() {
   th = document.createElement("th");
-  th.innerHTML = localStorage.getItem("height");
+  th.innerHTML = localStorage.getItem("width") * 1 + 1;
   tr = document.getElementById("transitions");
   tr.appendChild(th);
   columns = document.getElementById("table1").childNodes[1].childNodes;
   console.log(document.getElementById("table1").childNodes[1].childNodes);
-  for(var x=0;x<columns.length;x++) {
-    newth = document.createElement("th");
-    newInput = document.createElement("input");
-    newInput.id = localStorage.getItem("width") + alphabet[x-1];
-    newth.appendChild(newInput);
-    columns.childNodes[1].childNodes.appendChild(newth);
+  for(var x=2;x<document.getElementById("table1").childNodes[1].childNodes.length;x++) {
+    if(x % 2 == 0) {
+      newth = document.createElement("th");
+      newInput = document.createElement("input");
+      newInput.id = localStorage.getItem("width") + alphabet[(x/2)-1];
+      newth.appendChild(newInput);
+      document.getElementById("table1").childNodes[1].childNodes[x].appendChild(newth);
+    }
   }
   w = localStorage.getItem("width");
+  w = w * 1;
   localStorage.setItem("width", w + 1);
 }
