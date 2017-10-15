@@ -1,0 +1,23 @@
+{
+  "name": "dfa",
+  "version": "0.0.0",
+  "description": "Single webpage to process and take DFA's",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sdrafahl/DFA.git"
+  },
+  "author": "Shane Drafahl, Alec Harrison",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/sdrafahl/DFA/issues"
+  },
+  "dependencies": {
+    "express": "^4.16.2",
+    "mysql": "^2.15.0"
+  }
+}

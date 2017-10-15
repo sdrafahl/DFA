@@ -1,9 +1,8 @@
 var alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I",
- "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+ "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U",
+  "V", "W", "X", "Y", "Z"];
 
 var selected = false;
-
-
 
 function convertStateToString(state) {
   var out = "";
@@ -39,10 +38,43 @@ function convertStringToState(input) {
   return state;
 }
 
+function saveDFA() {
+  if(selected) {
+    var dfaString = "";
+    x = 0;
+    dfaString += localStorage.getItem("startLetter");
+    dfaString += ">";
+    while(localStorage.getItem(alphabet[x]) != null) {
+      dfaString += localStorage.getItem(alphabet[x]);
+      dfaString += "+";
+      x++;
+    }
+    us = document.getElementById("userInput").value;
+
+    $.ajax({
+      url: '/save',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify ({
+        user: us,
+        dfa: dfaString,
+      }),
+      success: function() {
+        console.log("success");
+      },
+      error: function(xhr, status, error) {
+        console.log("error");
+      },
+    });
+  }
+}
+
 window.onload = function() {
   localStorage.setItem("status", "noDfa");
   localStorage.setItem("height", 2);
   localStorage.setItem("width", 2);
+
+  setupUsers();
 
   var stateButton = document.getElementById("plusStates");
   stateButton.onclick = function() {
@@ -58,6 +90,130 @@ window.onload = function() {
   testButton.onclick = function() {
     test();
   }
+
+  var saveButton = document.getElementById("saveDFA");
+  saveButton.onclick = function() {
+    saveDFA();
+  };
+
+  var loadDfaButton = document.getElementById("loadButton");
+  loadDfaButton.onclick = function() {
+    selection = document.getElementById("users");
+    var userName = selection.options[selection.selectedIndex].text;
+    $.ajax({
+      url: '/getDFA',
+      type: 'POST',
+      contentType: 'application/json',
+      dataType: 'json',
+      data: JSON.stringify ({
+        user: userName
+      }),
+      success: function(data) {
+        var dfa = data.dfa;
+        var startStateLetter = dfa.charAt(0);
+
+        var state;
+        for(var x=2;x<dfa.length;x++) {
+          if(dfa.charAt(x) != "+") {
+            state += dfa.charAt(x);
+          } else {
+            localStorage.setItem(alphabet[x-2], state);
+            state = "";
+          }
+        }
+        start = localStorage.getItem(startStateLetter);
+        localStorage.setItem("start", start);
+        localStorage.setItem("startLetter", startStateLetter);
+        selected = true;
+        display = document.getElementById("dfa_status");
+        display.innerHTML = "DFA Selected"
+        populateTable(data);
+
+      },
+      error: function(xhr, status, error) {
+        console.log("error");
+      },
+    });
+  }
+}
+
+function populateTable(data) {
+  var startInput = document.getElementById("start");
+  startInput.value = localStorage.getItem("startLetter");
+  var width = 0;
+  tempDfa = localStorage.getItem(alphabet[0]);
+  for(var y=2;y<tempDfa.length;y++) {
+    if(tempDfa.charAt(y) == ":") {
+      width++;
+    }
+  }
+  width -= 2;
+  for(var b=0;b<width;b++) {
+    addTransition();
+  }
+  height = 0;
+  for(var n=0;n<data.dfa.length;n++) {
+    if(data.dfa.charAt(n) == "+") {
+      height++;
+    }
+  }
+  height -= 2;
+  for(var b=0;b<height;b++) {
+    addState();
+  }
+  for(x=0;x<alphabet.length;x++) {
+    if(localStorage.getItem(alphabet[x]) != null) {
+      dfa = localStorage.getItem(alphabet[x]);
+      if(dfa.charAt(0) == "T") {
+        terminalInput = document.getElementById("terminal");
+        terminalInput.value = alphabet[x];
+      }
+      count = 1;
+      for(var x1=2;x1<dfa.length;x1++) {
+        ch = dfa.charAt(x1);
+        if(ch == ":") {
+          x1++;
+          trans = dfa.charAt(x1);
+          id = count + alphabet[x];
+          inputBox = document.getElementById(id);
+          if(inputBox == null) {
+            return;
+          }
+          inputBox.value = trans;
+          box = document.getElementById("id");
+          count++;
+        }
+      }
+    }
+  }
+}
+
+function setupUsers() {
+  var list = document.getElementById("users");
+  var user = "";
+  $.ajax({
+    url: '/getUsers',
+    type: 'POST',
+    success: function(data) {
+      for(var x=0;x<data.users.length;x++) {
+        if(data.users.charAt(x) != ",") {
+          user += data.users.charAt(x);
+        } else {
+          option = document.createElement("option");
+          option.value = user;
+          option.innerHTML = user;
+          option.label = user;
+          selection = document.getElementById("users");
+          selection.appendChild(option);
+          user = "";
+        }
+      }
+    },
+    error: function(xhr, status, error) {
+      console.log("error");
+    }
+  });
+
 }
 
 function validate() {
@@ -80,6 +236,7 @@ function validate() {
 
    }
    var start = localStorage.getItem(document.getElementById("start").value.trim());
+   localStorage.setItem("startLetter", document.getElementById("start").value.trim());
    localStorage.setItem("start", start);
    localStorage.setItem("end", end);
    selected = true;
