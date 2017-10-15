@@ -1,12 +1,50 @@
 var alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I",
  "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
+var selected = false;
+
+
+
+function convertStateToString(state) {
+  var out = "";
+  if(state.terminal) {
+    out += "T-"
+  } else {
+    out += "O-"
+  }
+  for(var x=0;x<state.transitions.length;x++) {
+    out += x + ":" + state.transitions[x] + "-";
+  }
+  return out
+}
+
+function convertStringToState(input) {
+  var state = {
+    transitions: [],
+  };
+  if(input.charAt(0) == "T") {
+    state.terminal = true;
+  } else {
+    state.terminal = false;
+  }
+  first = true;
+  var from = "";
+  var to = "";
+  for(var x=2;x<input.length;x++) {
+    ch = input.charAt(x);
+    if(ch == ":") {
+      state.transitions.push(input.charAt(x+1));
+    }
+  }
+  return state;
+}
+
 window.onload = function() {
   localStorage.setItem("status", "noDfa");
   localStorage.setItem("height", 2);
   localStorage.setItem("width", 2);
 
-  var stateButton = document.getElementById("states");
+  var stateButton = document.getElementById("plusStates");
   stateButton.onclick = function() {
     addState();
   }
@@ -15,28 +53,57 @@ window.onload = function() {
   transButton.onclick = function() {
     addTransition();
   }
+
+  var testButton = document.getElementById("testButton");
+  testButton.onclick = function() {
+    test();
+  }
 }
 
 function validate() {
-   var start = document.getElementById("start").value;
    var end = document.getElementById("terminal").value;
-
-   for(var x = 0; x < alphabet.size; x++) {
-     if(document.getElementById(alphabet[x]) == null) {
-       return;
+   for(var x = 0; x<alphabet.length; x++) {
+     if(document.getElementById("1" + alphabet[x]) == null) {
+       break;
      }
-     var incra = 0;
+     var incra = 1;
      term = (end == alphabet[x]);
      var state = {
        terminal: term,
        transitions: [],
      };
-     localStorage.setItem(alphabet[x], state);
      while(document.getElementById(incra + alphabet[x]) != null) {
-       state.transitions.append(alphabet[x]);
+       state.transitions.push(document.getElementById(incra + alphabet[x]).value);
        incra++;
      }
+     localStorage.setItem(alphabet[x], convertStateToString(state));
+
    }
+   var start = localStorage.getItem(document.getElementById("start").value.trim());
+   localStorage.setItem("start", start);
+   localStorage.setItem("end", end);
+   selected = true;
+   display = document.getElementById("dfa_status");
+   display.innerHTML = "DFA Selected"
+}
+
+function test() {
+  if(selected) {
+    startState =  convertStringToState(localStorage.getItem("start"));
+    end = localStorage.getItem("end");
+    input = "" + document.getElementById("inputString").value;
+    for(var x=0;x<input.length;x++) {
+      ch = input.charAt(x);
+      ch = ch - 1;
+      startState = convertStringToState(localStorage.getItem(startState.transitions[ch]));
+    }
+    var element = document.getElementById("out");
+    if(startState.terminal) {
+      element.innerHTML = "This string is in the language defined by this DFA";
+    } else {
+      element.innerHTML = "This string is not the language defined by this DFA";
+    }
+  }
 }
 
 function addState() {
@@ -70,7 +137,6 @@ function addTransition() {
       newth = document.createElement("th");
       newInput = document.createElement("input");
       var a = "";
-      console.log(x);
       if(x > 6) {
         a = alphabet[(x-1)/2];
       } else {
